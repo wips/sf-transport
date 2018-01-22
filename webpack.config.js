@@ -3,30 +3,32 @@ const HtmlWebpackPlugin = require('html-webpack-plugin');
 const CleanWebpackPlugin = require('clean-webpack-plugin');
 
 module.exports = {
-    entry: './src/index.js',
+  entry: './src/index.js',
   devtool: 'inline-source-map',
   devServer: {
-      contentBase: './dist'
+    contentBase: './dist'
   },
    module: {
-     rules: [
-           {
-             test: /\.css$/,
-             use: [
-               'style-loader',
-               'css-loader'
-             ]
-       }
-     ]
+     rules: [{
+       test: /\.css$/,
+       use: [
+         'style-loader',
+         'css-loader'
+       ]
+     }],
+     loaders: [{
+       test: /\.json$/,
+       loader: 'json-loader'
+     }]
    },
     plugins: [
-        new CleanWebpackPlugin(['dist']),
-        new HtmlWebpackPlugin({
-            title: 'Development'
-        })
+      new CleanWebpackPlugin(['dist']),
+      new HtmlWebpackPlugin({
+        title: 'Development'
+      })
     ],
     output: {
-        filename: '[name].bundle.js',
-        path: path.resolve(__dirname, 'dist')
+      filename: '[name].bundle.js',
+      path: path.resolve(__dirname, 'dist')
     }
 };

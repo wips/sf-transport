@@ -1,43 +1,64 @@
-import * as d3 from "d3";
+import * as d3 from 'd3';
+const arteries = require('./sfmaps/arteries.json');
 
 main();
 
 function main() {
   const width = 600;
   const height = 600;
-  // addCanvas({ width, height });
+  const svg = getCanvas(width, height);
+  const { xs, ys } = getScales(width, height);
 
-  const el = document.createElement('svg');
-  el.setAttribute('id', 'canvas');
-  document.body.appendChild(el);
+  svg.append("path")
+    .datum({type: "FeatureCollection", features: arteries.features})
+    .attr("d", d3.geoPath().projection(d3.geoMercator()))
+    .attr("style", 'color: red');
 
-  const canvas = d3.select("#canvas")
+  // const lineFunction = d3.svg.line()
+  //   .x(([x]) => x)
+  //   .y(([, y]) => y)
+  //   .interpolate("linear");
+  // getArteriesLines().forEach(artery => {
+  //   svg.append("path")
+  //     .attr("d", lineFunction(artery));
+  // });
+
+}
+
+function getScales(width, height) {
+  const xScale = d3.scaleLinear()
+    .domain([0, d3.max(getArteriesDots(), ([x]) => x)])
+    .range([0, width]);
+
+  const yScale = d3.scaleLinear()
+    .domain([0, d3.max(getArteriesDots(), ([, y]) => y)])
+    .range([height, 0]);
+
+  return { xs: xScale, ys: yScale };
+}
+
+function getCanvas(width, height) {
+  const id = addCanvas();
+  return d3.select(`#${id}`)
     .append("svg")
     .attr("height", width)
     .attr("width", height);
-
-  var circle = canvas.append("circle") // Appending shape elements to the SVG element
-    .attr("cx", 250)
-    .attr("cy", 250)
-    .attr("r", 100)
-    .attr("fill", "red");
-  var rectangle = canvas.append("rect")
-    .attr("height", 500).attr("width", 100)
-    .attr("fill", "blue")
-    .attr("stroke", "blue")
-    .attr("stroke-width", 2);
-  var line = canvas.append("line")
-    .attr("x1", 500).attr("y1", 0)
-    .attr("x2", 500).attr("y2", 500)
-    .attr("stroke-width", 2)
-    .attr("stroke", "black");
 }
 
-function addCanvas({ width, height }) {
-  const body = document.body;
-  const canvas = document.createElement('svg');
-  // canvas.setAttribute('width', width);
-  // canvas.setAttribute('height', height);
-  canvas.setAttribute('id', 'canvas');
-  body.appendChild(canvas);
+function getArteriesLines() {
+  return arteries.features
+    .map(({ geometry }) => geometry.coordinates.map(([x, y]) => [x, y]));
+}
+
+function getArteriesDots() {
+  return getArteriesLines()
+    .reduce((acc, line) => [...acc, ...line], []);
+}
+
+function addCanvas() {
+  const el = document.createElement('div');
+  const id = 'canvas';
+  el.setAttribute('id', id);
+  document.body.appendChild(el);
+  return id;
 }
